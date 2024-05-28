@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct {
+    double x;
+    double y;
+} Point;
+
+typedef struct {
+    Point point;
+    double label;
+} DataPoint;
+
+// Mesafa hesaplama fonkisyonu
+double distance(Point p1, Point p2) {
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+}
+
+// KNN regresyonunu gerçekleştirme işlevi
+double knn_regression(DataPoint *Data, int Data_Size, Point test_point, int k) {
+    //  mesafeleri hesaplayın
+    double distances[Data_Size];
+    for (int i = 0; i < Data_Size; i++) {
+        distances[i] = distance(Data[i].point, test_point);
+    }
+
+
+    // Sıralama algoritması 
+    for (int i = 0; i < Data_Size - 1; i++) {
+        for (int j = 0; j < Data_Size - i - 1; j++) {
+            if (distances[j] > distances[j + 1]) {
+                // Swap distances
+                double temp = distances[j];
+                distances[j] = distances[j + 1];
+                distances[j + 1] = temp;
+
+                // Swap 
+                DataPoint temp_point = Data[j];
+                Data[j] = Data[j + 1];
+                Data[j + 1] = temp_point;
+                
+
+            }
+        }
+    }
+
+    /*
+    for (int i=0 ; i < Data_Size ; ++i)
+    {
+        printf("%f\n",distances[i]);
+    }
+    printf("\n");
+    for (int i=0 ; i < Data_Size ; ++i)
+    {
+        printf("%f\n",Data[i].label);
+    }
+    printf("\n");
+    */
+        
+    
+    // K ye en yakın komşular ortalama  hesaplama
+    double sum = 0.0;
+    for (int i = 0; i < k; i++) {
+        sum += Data[i].label;
+    }
+
+    return sum / k;
+}
+
+int main() {
+    // Örnek 
+    DataPoint Data[] = {
+        {{33, 150000}, 264},
+        {{60, 100000}, 139},
+        {{35,120000 }, 139},
+        {{25,40000 },135 },
+        {{35,60000 },256 },
+        
+    };
+                        // 120           // 24  
+    int Data_Size = sizeof(Data) / sizeof(Data[0]); // 5
+    
+    Point test_point = {48,142000 };
+    int k = 3; //  k=5 olsaydi 
+
+    double predicted_label = knn_regression(Data, Data_Size, test_point, k);
+
+    printf("Predicted label: %f\n", predicted_label);
+
+    return 0;
+}
